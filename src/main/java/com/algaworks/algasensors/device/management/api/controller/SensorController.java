@@ -7,6 +7,7 @@ import com.algaworks.algasensors.device.management.domain.model.Sensor;
 import com.algaworks.algasensors.device.management.domain.model.SensorId;
 import com.algaworks.algasensors.device.management.domain.repository.SensorRepository;
 import io.hypersistence.tsid.TSID;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,15 +32,14 @@ public class SensorController {
 
     @GetMapping("{sensorId}")
     public SensorOutput getOne(@PathVariable TSID sensorId) {
-        Sensor sensor = sensorRepository.findById(new SensorId(sensorId))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Sensor sensor = getSensor(sensorId);
 
         return toModel(sensor);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public SensorOutput create(@RequestBody SensorInput input) {
+    public SensorOutput create(@Valid @RequestBody SensorInput input) {
 
         Sensor sensor = Sensor.builder()
                 .id(new SensorId(IdGenerator.generateTSID()))
@@ -56,7 +56,32 @@ public class SensorController {
         return toModel(sensor);
     }
 
+    @PutMapping("{sensorId}")
+    public SensorOutput update(@PathVariable TSID sensorId, @Valid @RequestBody SensorInput input) {
+
+        Sensor sensor = getSensor(sensorId);
+        sensor.setName(input.name());
+        sensor.setIp(input.ip());
+        sensor.setLocation(input.location());
+        sensor.setProtocol(input.protocol());
+        sensor.setModel(input.model());
+
+        sensorRepository.saveAndFlush(sensor);
+
+        return toModel(sensor);
+    }
+
+    @DeleteMapping("{sensorId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable TSID sensorId) {
+
+        Sensor sensor = getSensor(sensorId);
+
+        sensorRepository.delete(sensor);
+    }
+
     private SensorOutput toModel(Sensor sensor) {
+
         return new SensorOutput(
                 sensor.getId().getValue(),
                 sensor.getName(),
@@ -66,5 +91,11 @@ public class SensorController {
                 sensor.getModel(),
                 sensor.getEnabled()
         );
+    }
+
+    private Sensor getSensor(TSID sensorId) {
+
+        return sensorRepository.findById(new SensorId(sensorId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 }

@@ -1,9 +1,11 @@
 package com.algaworks.algasensors.device.management.api.model;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record SensorInput(
-        String name,
-        String ip,
-        String location,
-        String protocol,
-        String model) {
+        @NotBlank String name,
+        @NotBlank String ip,
+        @NotBlank String location,
+        @NotBlank String protocol,
+        @NotBlank String model) {
 }
