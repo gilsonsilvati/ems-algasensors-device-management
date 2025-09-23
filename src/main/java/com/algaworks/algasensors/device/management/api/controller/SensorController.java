@@ -40,7 +40,6 @@ public class SensorController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public SensorOutput create(@Valid @RequestBody SensorInput input) {
-
         Sensor sensor = Sensor.builder()
                 .id(new SensorId(IdGenerator.generateTSID()))
                 .name(input.name())
@@ -58,7 +57,6 @@ public class SensorController {
 
     @PutMapping("{sensorId}")
     public SensorOutput update(@PathVariable TSID sensorId, @Valid @RequestBody SensorInput input) {
-
         Sensor sensor = getSensor(sensorId);
         sensor.setName(input.name());
         sensor.setIp(input.ip());
@@ -74,14 +72,34 @@ public class SensorController {
     @DeleteMapping("{sensorId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable TSID sensorId) {
-
         Sensor sensor = getSensor(sensorId);
 
         sensorRepository.delete(sensor);
     }
 
-    private SensorOutput toModel(Sensor sensor) {
+    @PutMapping("{sensorId}/enable")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void enabled(@PathVariable TSID sensorId) {
+        Sensor sensor = getSensor(sensorId);
 
+        if (Boolean.FALSE.equals(sensor.getEnabled())) {
+            sensor.setEnabled(Boolean.TRUE);
+            sensorRepository.save(sensor);
+        }
+    }
+
+    @DeleteMapping("{sensorId}/enable")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void disabled(@PathVariable TSID sensorId) {
+        Sensor sensor = getSensor(sensorId);
+
+        if (Boolean.TRUE.equals(sensor.getEnabled())) {
+            sensor.setEnabled(Boolean.FALSE);
+            sensorRepository.save(sensor);
+        }
+    }
+
+    private SensorOutput toModel(Sensor sensor) {
         return new SensorOutput(
                 sensor.getId().getValue(),
                 sensor.getName(),
@@ -94,7 +112,6 @@ public class SensorController {
     }
 
     private Sensor getSensor(TSID sensorId) {
-
         return sensorRepository.findById(new SensorId(sensorId))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
