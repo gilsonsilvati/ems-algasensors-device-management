@@ -79,7 +79,7 @@ public class SensorController {
 
     @PutMapping("{sensorId}/enable")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void enabled(@PathVariable TSID sensorId) {
+    public void enable(@PathVariable TSID sensorId) {
         Sensor sensor = getSensor(sensorId);
 
         if (Boolean.FALSE.equals(sensor.getEnabled())) {
@@ -90,7 +90,7 @@ public class SensorController {
 
     @DeleteMapping("{sensorId}/enable")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void disabled(@PathVariable TSID sensorId) {
+    public void disable(@PathVariable TSID sensorId) {
         Sensor sensor = getSensor(sensorId);
 
         if (Boolean.TRUE.equals(sensor.getEnabled())) {
